@@ -18,6 +18,11 @@ async fn get(data: web::Data<AppData>, info: web::Json<Get>) -> Result<Bytes> {
 #[actix_web::get("/scan")]
 async fn scan(data: web::Data<AppData>, info: web::Json<Scan>) -> Result<Bytes> {
     use std::ops::Bound::{Excluded as E, Included as I, Unbounded as U};
+    if let (Some((s, se)), Some((e, ei))) = (info.start, info.end) {
+        if s > e || (s == e && se && !ei) {
+            return Err(actix_web::error::ErrorBadRequest("Invalid range"));
+        }
+    }
     let s = info.start.map_or(U, |(s, e)| if !e { I(s) } else { E(s) });
     let e = info.end.map_or(U, |(e, i)| if !i { E(e) } else { I(e) });
     let kv = &data.kvmg()?.kv;

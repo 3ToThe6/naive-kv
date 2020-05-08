@@ -43,7 +43,12 @@ pub fn get(key: u64) -> Result<Option<Box<[u8]>>> {
     Ok(bincode::deserialize(&request.send()?.bytes()?)?)
 }
 
-pub fn scan(start: Option<(u64, bool)>, end: Option<(u64, bool)>) -> Result<Vec<(u64, Box<u8>)>> {
+pub fn scan(start: Option<(u64, bool)>, end: Option<(u64, bool)>) -> Result<Vec<(u64, Box<[u8]>)>> {
+    if let (Some((s, se)), Some((e, ei))) = (start, end) {
+        if s > e || (s == e && se && !ei) {
+            panic!("Invalid range");
+        }
+    }
     let mut url = server_url();
     url.set_path("/scan");
     let request = Client::new().get(url).json(&req::Scan { start, end });
@@ -67,4 +72,31 @@ pub fn delete(key: u64) -> reqwest::Result<()> {
         .json(&req::Delete { key })
         .send()?;
     Ok(())
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[test]
+    fn main() {
+        // Put
+        put(0, &[0; 256]).unwrap();
+        put(1, &[1; 256]).unwrap();
+        put(2, &[2; 256]).unwrap();
+        put(3, &[3; 256]).unwrap();
+        // Delete
+        delete(2).unwrap();
+        // Get
+        assert_eq!(get(2).unwrap(), None);
+        assert_eq!(get(4).unwrap(), None);
+        assert_eq!(get(3).unwrap(), Some(vec![3; 256].into_boxed_slice()));
+        // Scan
+        assert_eq!(
+            scan(Some((0, true)), None).unwrap(),
+            vec![
+                (1, vec![1; 256].into_boxed_slice()),
+                (3, vec![3; 256].into_boxed_slice()),
+            ],
+        );
+    }
 }
