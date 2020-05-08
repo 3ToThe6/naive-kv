@@ -6,7 +6,7 @@
 
 ### Server
 
-基于 actix-web 框架。查询结果（若有）由 bincode 库编码，以确保返回大量数据时的带宽消耗处于与直接使用 socket 实现整个服务器时相近的水平。使用 ``u64`` 而非 ``[u8; 8]`` 作为键，因为 ``u64`` 之间的比较会快一些。借助 RAII 实现 graceful shutdown（POST "/stop" 或 SIGTERM）时自动保存键值数据。
+基于 actix-web 框架。查询结果（若有）由 bincode 库编码，以确保返回大量数据时的带宽消耗处于与直接使用 socket 实现整个服务器时相近的水平。使用 ``u64`` 而非 ``[u8; 8]`` 作为键，因为 ``u64`` 之间的比较会快一些。借助 RAII 实现 graceful shutdown（POST "/stop" 或 SIGTERM）时自动保存键值数据到文件。
 
 实现的接口：
 * GET "/"：类似于 TiKV 的 Get；
