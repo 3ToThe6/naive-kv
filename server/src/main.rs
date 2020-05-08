@@ -15,7 +15,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .wrap(middleware::Logger::default())
             .configure(config)
     })
-    .bind(server_address())?
+    .bind(server_address().as_ref())?
     .run();
     let server_cloned = server.clone();
     thread::spawn(move || {
