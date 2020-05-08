@@ -38,12 +38,29 @@ pub type Result<T> = std::result::Result<T, Error>;
 
 /// An RAII key-value map manager. When dropped, it saves map to the file from which the map was tried to load.
 pub struct KvManager<P: AsRef<Path>> {
-    /// Key-value map. We use ``u64`` as key type instead of ``[u8; 8]``, because ``u64`` has a faster ``impl Ord``. We use ``Box<[u8]>`` as value type instead of ``[u8; 256]``, because ``[u8; 256]`` does not implement ``Serialize``.
+    /// Key-value map. We use ``u64`` as key type instead of ``[u8; 8]``, because ``u64`` has a faster ``impl Ord``. We use ``Box<[u8]>`` as value type instead of ``[u8; 256]``, because ``[u8; 256]`` does not implement ``Serialize`` and ``Deserialize``.
     pub kv: BTreeMap<u64, Box<[u8]>>,
     path: P,
 }
 
 impl<P: AsRef<Path>> KvManager<P> {
+    pub fn new(path: P) -> Result<Self> {
+        let kv = match fs::read(path.as_ref()) {
+            Ok(bytes) => bincode::deserialize(&bytes)?,
+            Err(e) => {
+                if e.kind() == io::ErrorKind::NotFound {
+                    log::info!(
+                        "File {} not found. Creating new database...",
+                        path.as_ref().display()
+                    );
+                    BTreeMap::new()
+                } else {
+                    return Err(e.into());
+                }
+            }
+        };
+        Ok(Self { kv, path })
+    }
     pub fn save(&self) -> Result<()> {
         fs::write(self.path.as_ref(), bincode::serialize(&self.kv)?)?;
         Ok(())
