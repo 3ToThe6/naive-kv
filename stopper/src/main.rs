@@ -1,11 +1,9 @@
-use std::str::FromStr;
-
-use reqwest::{blocking::Client, Url};
+use reqwest::blocking::Client;
 
 use common::*;
 
 fn main() {
-    let mut url = Url::from_str(&format!("http://{}/", server_address().as_ref())).unwrap();
+    let mut url = server_url();
     url.set_path("/stop");
     Client::new().post(url).send().unwrap();
 }

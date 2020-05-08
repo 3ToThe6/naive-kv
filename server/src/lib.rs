@@ -31,7 +31,7 @@ impl AppData {
 
 pub fn config(cfg: &mut web::ServiceConfig) {
     cfg.service(get)
-        .service(put)
+        .service(scan)
         .service(put)
         .service(delete)
         .service(stop);

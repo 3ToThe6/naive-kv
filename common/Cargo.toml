@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 serde = { version = "1.0.106", features = ["derive"] }
+url = "2.1.1"

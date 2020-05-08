@@ -14,9 +14,9 @@ pub struct Scan {
 }
 
 #[derive(Deserialize, Serialize)]
-pub struct Put {
+pub struct Put<V: AsRef<[u8]>> {
     pub key: u64,
-    pub value: Box<[u8]>,
+    pub value: V,
 }
 
 #[derive(Deserialize, Serialize)]

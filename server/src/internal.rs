@@ -26,8 +26,11 @@ async fn scan(data: web::Data<AppData>, info: web::Json<Scan>) -> Result<Bytes> 
 }
 
 #[actix_web::put("/")]
-async fn put(data: web::Data<AppData>, info: web::Json<Put>) -> Result<HttpResponse> {
+async fn put(data: web::Data<AppData>, info: web::Json<Put<Box<[u8]>>>) -> Result<HttpResponse> {
     let web::Json(Put { key, value }) = info;
+    if value.len() != 256 {
+        return Err(actix_web::error::ErrorBadRequest("value.len() != 256"));
+    }
     data.kvmg_mut()?.kv.insert(key, value);
     Ok(HttpResponse::Ok().finish())
 }
