@@ -8,7 +8,7 @@
 
 基于 actix-web 框架。查询结果（若有）由 bincode 库编码，以确保返回大量数据时的带宽消耗处于与直接使用 socket 实现整个服务器时相近的水平。使用 ``u64`` 而非 ``[u8; 8]`` 作为键，因为 ``u64`` 之间的比较会快一些。借助 RAII 实现 graceful shutdown（POST "/stop" 或 SIGTERM）时自动保存键值数据到文件。
 
-实现的接口：
+实现的接口（要求的 json 形式参见 ``common/src/req.rs``）：
 * GET "/"：类似于 TiKV 的 Get；
 * GET "/scan"：类似于 TiKV 的 Scan；
 * PUT "/"：类似于 TiKV 的 Put，旧值（若有）会被覆盖；
@@ -48,4 +48,4 @@ cargo run --bin client
 
 在服务端准备了部分文档，可 ``cargo doc --open`` 查看。
 
-在客户端准备了少量的单元测试，见 ``client/src/lib.rs``。
+在客户端准备了少量的单元测试，见 ``client/src/lib.rs``。在 ``cargo test`` 前，请确保服务器已在运行且相应数据库为空。
